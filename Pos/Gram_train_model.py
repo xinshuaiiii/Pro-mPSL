@@ -13,22 +13,22 @@ class Only_LSTM(nn.Module):
 
     self.rnn = nn.LSTM(input_size_LSTM,
                         hidden_size,
-                        num_layers=1,     #LSTM层数2022.9.9加入
+                        num_layers=1,    
                         batch_first=True,
                         bidirectional=True)
     
-    self.fc = nn.Linear(hidden_size * 2, 4)  #全连接层,输出四个类别
+    self.fc = nn.Linear(hidden_size * 2, 4)  
   
     self.dropout = nn.Dropout(dropout)
 
   def forward(self, features):
     out, (hidden, cell) = self.rnn(features)
-    #hidden_size维度(num_layers * num_directions, batch, hidden_size)，这里是[2,250,160]
+
     out = torch.cat([hidden[-2, :, :], hidden[-1, :, :]], dim=1)
     out = self.dropout(out)           
-    #print(out,out.shape)    #[250,320]
-    out = self.fc(out)   #全连接层
-    #print('最终输出形状为:{}'.format(out.shape))   # [250,10]
+    #print(out,out.shape)    
+    out = self.fc(out)   
+    #print('shape:{}'.format(out.shape))   
 
     return out
 
