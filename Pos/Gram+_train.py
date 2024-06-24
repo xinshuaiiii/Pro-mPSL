@@ -1,11 +1,3 @@
-'''
-这里是使用一组超参数和通过该组超参数得到的最优阈值来进行8折交叉验证获得8个子模型(有early-stoping)
-分别对8折交叉验证的8个训练集应用8组贝叶斯超参数并获得8个子模型
-
-2024.1.26该文件用来测试革兰氏阳性数据集在八折交叉验证，仅包含双向LSTM网络，重采样
-但是没有选择阈值和超参数的情况下的效果
-'''
-
 import json
 import math
 import os
@@ -36,7 +28,7 @@ from collections import Counter
 
 def seed_torch(seed=0):
 	random.seed(seed)
-	os.environ['PYTHONHASHSEED'] = str(seed) # 为了禁止hash随机化，使得实验可复现
+	os.environ['PYTHONHASHSEED'] = str(seed) 
 	np.random.seed(seed)
 	torch.manual_seed(seed)
 	torch.cuda.manual_seed(seed)
@@ -46,7 +38,7 @@ def seed_torch(seed=0):
 
 
 
-def check_accuracy(model, X, y): # 检查模型在验证集上的F1值
+def check_accuracy(model, X, y): 
   
   model.eval()
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -68,8 +60,8 @@ def check_accuracy(model, X, y): # 检查模型在验证集上的F1值
     y = torch.stack(y)
     # print('y_pred为{}\n'.format(y_pred))
     # print('y为{}\n'.format(y))
-    #best_th, best_mcc = find_best_threshold(pred_label, y)   #获取每个类的最小最佳阈值
-    best_threshold = [0.4,0.5,0.6,0.7]        #选取好的最优阈值
+    #best_th, best_mcc = find_best_threshold(pred_label, y)   
+    best_threshold = [0.4,0.5,0.6,0.7]       
     y_pred = (pred_label >= torch.Tensor(best_threshold)).float().cpu()
  
     macro_f1score = f1_score(y, y_pred, average='macro')
@@ -78,19 +70,19 @@ def check_accuracy(model, X, y): # 检查模型在验证集上的F1值
     class_names = ['Cytoplasmic','CytoplasmicMembrane','Extracellular','Cellwall']
     
     classification_result = classification_report(y, y_pred, target_names=class_names)
-    print(classification_result)  #输出多标签中每个类的精确率和召回率
+    print(classification_result)  
     confusion_matrix = multilabel_confusion_matrix(y, y_pred)
-    print(confusion_matrix)   #为每个类生成混淆矩阵：列true[0,1],行predict[0,1]
+    print(confusion_matrix)  
     
-  return hammingloss, macro_f1score, micro_f1score, out, classification_result, confusion_matrix  #获得汉明损失和F1分数
+  return hammingloss, macro_f1score, micro_f1score, out, classification_result, confusion_matrix  
 
-def collate_fn(train_data):   #重新设计dataloader数据分法
-    train_data.sort(key=lambda data: len(data[0]), reverse=True)  #根据data的长度进行排序，reverse从大到小排序
+def collate_fn(train_data):   
+    train_data.sort(key=lambda data: len(data[0]), reverse=True)  
     data = [sq[0] for sq in train_data]
     label = [sq[1] for sq in train_data]
     data_length = [len(l) for l in data]
     train_data = rnn_utils.pad_sequence(data, batch_first=True, padding_value=0)
-    label = rnn_utils.pad_sequence(label, batch_first=True, padding_value=0.0)   # 这行代码只是为了把列表变为tensor
+    label = rnn_utils.pad_sequence(label, batch_first=True, padding_value=0.0)   
     return train_data, label, data_length
 
 
@@ -115,7 +107,7 @@ def train(model,
           y_test,
           total_epoch,
           batch_size,
-          learning_rate,  #lstm hidden_size=160时可以有效收敛
+          learning_rate,  
           state=None,
           ):
   
@@ -123,11 +115,11 @@ def train(model,
   print(len(X_train))
   print(len(X_test))
 
-  #####统计每个类别的样本数量，用于计算classaware重采样的epoch内样本数####
+
   cls_data_list = []
 
-  num_classes = 4 #类别数量
-  num_samples_cls=1    #整个epoch中每次从任意一类中取几个数据
+  num_classes = 4 
+  num_samples_cls=1    
   for i in range(num_classes):
       data_list = []
       for index, data in enumerate(y_train):
@@ -135,21 +127,21 @@ def train(model,
               data_list.append(index)
       cls_data_list.append(data_list)
 
-  #print(cls_data_list)  #统计出每个类别有哪些样本
+  #print(cls_data_list)  
   class_names = ['Cytoplasmic','CytoplasmicMembrane','Extracellular','Cellwall']
   for index , n in enumerate(cls_data_list):
-      print("{}类别的样本数量为{}".format(class_names[index],len(n)))  #输出每个类别的样本数量
+      print("numbers of samples for category{} is{}".format(class_names[index],len(n)))  
 #####################################################################
   sampler = ClassAwareSampler(data_list=cls_data_list, num_classes=num_classes, num_samples_cls=num_samples_cls, reduce=1)
-  #reduce用于削减epoch的样本数
+  
   train_data = DataLoader(dataset(X_train, y_train), batch_size=batch_size, sampler=sampler, collate_fn=collate_fn)
-  #optimizer = optim.Adam(model.parameters(), lr=learning_rate,weight_decay=0.0001)   #weight_decay L2正则化
+  #optimizer = optim.Adam(model.parameters(), lr=learning_rate,weight_decay=0.0001)   
   optimizer = optim.Adam(model.parameters(), lr=learning_rate)
   criterion = nn.BCEWithLogitsLoss()
 
 
   model = model.to(device)
-  state = dict()  #空字典
+  state = dict()  
   state['microf1'] = []
   state['macrof1'] = []
   state['hammingloss'] = []
@@ -157,7 +149,7 @@ def train(model,
   state['val_microf1'] = []
   state['val_macrof1'] = []
 
-  best_val = -0.00001    #2023.5.6修改内容，为了防止val_macro_f1score等于0的情况时，不更新state字典
+  best_val = -0.00001    
   epochs_without_improvement = 0
   best_threshold = [0.4,0.5,0.6,0.7]
   for epoch in trange(0, total_epoch):
@@ -193,9 +185,9 @@ def train(model,
 
     #gpu_tracker.track()
 
-    y_pred = torch.vstack(y_pred_list)   #将每个batch的预测结果拼接起来
+    y_pred = torch.vstack(y_pred_list)   
     y_train = torch.vstack(y_train_list)
-    print('经过重采样后每类样本共{}个'.format(y_train.shape[0]/10))
+    print('After resampling, each class of samples {}'.format(y_train.shape[0]/10))
 
     macro_f1score = f1_score(y_train, y_pred, average='macro')
     micro_f1score = f1_score(y_train, y_pred, average='micro')
@@ -222,14 +214,14 @@ def train(model,
       state['best_epoch'] = epoch
       epochs_without_improvement = 0
       model_dir = os.path.join(source_dir, 'val_models_random')
-      for fname in os.listdir(model_dir):  #返回指定的文件夹包含的文件或文件夹的名字的列表
-            if fname.startswith('_'.join(['fold',str(val_fold_number-1)])):  #返回一个布尔值，判断字符串fname是否以指定的子字符串开头
-                #.join表示将字符串中的元素以指定的字符'_'连接生成一个新的字符串
-                os.remove(os.path.join(model_dir, fname))  #删除指定路径的文件
-      torch.save(model.state_dict(), os.path.join(model_dir, '_'.join(['fold',str(val_fold_number-1)])+'_'.join([prefix,'epoch'])+str(epoch)+'para')) #保存模型参数
+      for fname in os.listdir(model_dir):  
+            if fname.startswith('_'.join(['fold',str(val_fold_number-1)])):  
+              
+                os.remove(os.path.join(model_dir, fname))  
+      torch.save(model.state_dict(), os.path.join(model_dir, '_'.join(['fold',str(val_fold_number-1)])+'_'.join([prefix,'epoch'])+str(epoch)+'para')) 
     else:
         epochs_without_improvement += 1
-    print("第{}折交叉验证,验证集最好F1为{},epoch为{}".format(val_fold_number-1,state['best_val'],state['best_epoch']))
+    print("{}K-Fold,best F1{},epoch {}".format(val_fold_number-1,state['best_val'],state['best_epoch']))
     print('epoch:{} loss:{:.5f} hamming_loss:{:.5f} macro_f1score:{:.5f} micro_f1score:{:.5f} val_hamming_loss:{:.5f} val_macro_f1score:{:.5f} val_micro_f1score:{:.5f}'.
           format(epoch, running_loss, hammingloss, macro_f1score, micro_f1score, val_hamming, val_macro_f1score, val_micro_f1score))
     writer.add_scalar("loss"+str(val_fold_number-1),running_loss,epoch)
@@ -248,7 +240,7 @@ def train(model,
     d["confusion_matrix"] = best_confusion_matrix
     d["classification_result"] = best_classification_result
     np.save(os.path.join(log_dir, '_'.join([prefix,'epoch'])+str(epoch)+'_'.join(['fold',str(val_fold_number-1)])+'.npy'), d)
-    #json.dump(d, f)  #将dict类型的数据转换成json格式的数据
+    #json.dump(d, f) 
 
     if epochs_without_improvement > 10:
         break
@@ -261,12 +253,11 @@ def train(model,
 seed_torch()
 writer = SummaryWriter("/root/tf-logs")   
 
-###########直接将验证集和训练集分割好了############
 
-train_data = pd.read_pickle('/root/autodl-tmp/原核数据集/革兰氏阳性数据集/G+训练集/fold7/train_fold7.pkl')
-val_data = pd.read_pickle('/root/autodl-tmp/原核数据集/革兰氏阳性数据集/G+训练集/fold7/val_fold7.pkl')
-val_fold_number = 8  #范围1-8
-################################################
+train_data = pd.read_pickle('train.pkl')
+val_data = pd.read_pickle('val.pkl')
+val_fold_number = 8  
+
 train_embeddings = train_data.embeddings.values
 val_embeddings = val_data.embeddings.values
 
@@ -274,14 +265,14 @@ val_embeddings = val_data.embeddings.values
 train_labels = [torch.Tensor(np.array(label)) for label in train_data.onehot_label.values]
 val_labels = [torch.Tensor(np.array(label)) for label in val_data.onehot_label.values]
 
-preprocessed_text_train = [torch.Tensor(np.array(embeddings)) for embeddings in train_embeddings]  #列表中每个元素torch.Size([500, 25])
+preprocessed_text_train = [torch.Tensor(np.array(embeddings)) for embeddings in train_embeddings]  
 preprocessed_text_val = [torch.Tensor(np.array(embeddings)) for embeddings in val_embeddings]
 
 train_X = preprocessed_text_train
 val_X = preprocessed_text_val
 
 
-source_dir = '/root/autodl-tmp/原核模型/革兰氏阳性菌/LSTM模型'
+source_dir = 'your dir'
 prefix = 'train_new' 
 
 print('Train label shape {}'.format(len(train_labels)))
