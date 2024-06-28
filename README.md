@@ -1,6 +1,10 @@
 # Pro-mPSL/Datastes
 The Datastes you can find in Fesc-PSL/Datasets.
-# Pro-mPSL/train
+
+# ProtT5
+You can download the ProtT5-XL-UniRef50 model from this [[website]](https://github.com/agemagician/ProtTrans),there is a detailed tutorial on how to use the model.If you download the model locally,ProtT5.py can help you convert sequences to embeddings,you just need to modify the model path in the file.
+
+# train
 requirements.txt is the environment needed for running.
 
 
