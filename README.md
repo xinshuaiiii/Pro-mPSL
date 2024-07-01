@@ -3,7 +3,12 @@ The Datastes you can find in Fesc-PSL/Datasets.
 
 # ProtT5
 You can download the ProtT5-XL-UniRef50 model from this [[website]](https://github.com/agemagician/ProtTrans),there is a detailed tutorial on how to use the model.If you download the model locally,ProtT5.py can help you convert sequences to embeddings,you just need to modify the model path in the file.
-`<python generate_embeddings.py>` 
+
+Configure the model and sequence files, that is, put the pre-trained T5 model in the ../prot5 directory.Put your protein sequence in the sequence.txt file.Run the following command.
+```
+pip install -r requirements.txt
+python Prott5.py --model_path ../prot5 --filename sequence.txt --output_path embeddings.npy
+```
 
 
 # train
