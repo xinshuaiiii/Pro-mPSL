@@ -3,6 +3,8 @@ The Datastes you can find in Fesc-PSL/Datasets.
 
 # ProtT5
 You can download the ProtT5-XL-UniRef50 model from this [[website]](https://github.com/agemagician/ProtTrans),there is a detailed tutorial on how to use the model.If you download the model locally,ProtT5.py can help you convert sequences to embeddings,you just need to modify the model path in the file.
+python generate_embeddings.py
+
 
 # train
 requirements.txt is the environment needed for running.
