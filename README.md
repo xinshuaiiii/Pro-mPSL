@@ -6,6 +6,8 @@ To run the code, we need to create a virtual environment using Anaconda, and ins
 ```
 conda create -n predict pyhton=3.7.13
 conda activate predict
+[git clone https://github.com/username/repository.git](https://github.com/xinshuaiiii/Pro-mPSL.git)
+cd Pro-mPSL
 pip install -r requirements.txt
 ```
 
