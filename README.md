@@ -42,5 +42,7 @@ cd /your/path
 python Gram-_train.py --train_data_path data/train_data.pkl --val_data_path data/val_data.pkl --source_dir results --prefix experiment1 --total_epoch 50 --batch_size 64 --learning_rate 0.000766
 ```
 
-For the construction and principle of the model, please refer to Pro-mPSL: An Ensemble Prediction Model for Bacterial Protein Subcellular Localization Based on Pre-trained Protein Language Model and Bi-LSTM (submission in progress)
+For the construction and principle of the model, please refer to Pro-mPSL: An Ensemble Prediction Model for Bacterial Protein Subcellular Localization Based on Pre-trained Protein Language Model and Bi-LSTM (submission in progress).
+
+
 If you have any questions, please contact: liuyun313@jlu.edu.cn or xinshaui23@jlu.edu.cn
