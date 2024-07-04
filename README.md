@@ -33,11 +33,11 @@ python Prott5.py --model_path ../prot5 --filename test-152-single-del-seq --outp
 ```
 Then transform it into training set and test set.Place the training data and val data in the path of 'Pos/Gram+_train.py' , you can start to train and get the training model.If your training and validation data files are located at data/train_data.pkl and data/val_data.pkl respectively, and you want to save the model and logs to the results/ directory, using the prefix experiment1, you can run:
 ```
-cd /your/path/
+cd /your/path
 python Gram+_train.py --train_data_path data/train_data.pkl --val_data_path data/val_data.pkl --source_dir results --prefix experiment1 --total_epoch 50 --batch_size 64 --learning_rate 0.000766
 ```
 Neg is the same.
 ```
-cd /your/path/
+cd /your/path
 python Gram-_train.py --train_data_path data/train_data.pkl --val_data_path data/val_data.pkl --source_dir results --prefix experiment1 --total_epoch 50 --batch_size 64 --learning_rate 0.000766
 ```
